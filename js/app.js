@@ -32,25 +32,27 @@ class CalorieTracker {
   }
 
   removeMeal(id) {
-    const index = this._meals.findIndex((meal) => meal.id === id);
-    if (index !== -1) {
-      const meal = this._meals[index];
-      this._meals.splice(index, 1);
-      this._totalCalories -= meal.calories;
-      Storage.updateTotalCalories(this._totalCalories);
-      this._render();
-    }
+    this._meals.forEach((meal, index) => {
+      if (meal.id === id) {
+        this._totalCalories -= meal.calories;
+        this._meals.splice(index, 1);
+      }
+    });
+    Storage.updateTotalCalories(this._totalCalories);
+    Storage.removeMeal(id);
+    this._render();
   }
 
   removeWorkout(id) {
-    const index = this._workouts.findIndex((workout) => workout.id === id);
-    if (index !== -1) {
-      const workout = this._workouts[index];
-      this._workouts.splice(index, 1);
-      this._totalCalories += workout.calories;
-      Storage.updateTotalCalories(this._totalCalories);
-      this._render();
-    }
+    this._workouts.forEach((workout, idx) => {
+      if (workout.id === id) {
+        this._totalCalories += workout.calories;
+        this._workouts.splice(idx, 1);
+      }
+    });
+    Storage.updateTotalCalories(this._totalCalories);
+    Storage.removeWorkout(id);
+    this._render();
   }
 
   setLimit(calorieLimit) {
@@ -250,6 +252,17 @@ class Storage {
     localStorage.setItem("meals", JSON.stringify(meals));
   }
 
+  static removeMeal(id) {
+    const meals = Storage.getMeals();
+    meals.forEach((meal, idx) => {
+      if (meal.id === id) {
+        meals.splice(idx, 1);
+      }
+    });
+
+    localStorage.setItem("meals", JSON.stringify(meals));
+  }
+
   static getWorkouts() {
     let workouts;
     if (localStorage.getItem("workouts") === null) {
@@ -263,6 +276,17 @@ class Storage {
   static setWorkouts(workout) {
     const workouts = Storage.getWorkouts();
     workouts.push(workout);
+    localStorage.setItem("workouts", JSON.stringify(workouts));
+  }
+
+  static removeWorkout(id) {
+    const workouts = Storage.getWorkouts();
+    workouts.forEach((workout, idx) => {
+      if (workout.id === id) {
+        workouts.splice(idx, 1);
+      }
+    });
+
     localStorage.setItem("workouts", JSON.stringify(workouts));
   }
 }
